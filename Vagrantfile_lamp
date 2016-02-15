@@ -34,7 +34,7 @@ Vagrant.configure(2) do |config|
         sudo yum install -y mysql mysql-server mysql-devel
         sudo chkconfig --add mysqld
         sudo chkconfig mysqld on
-        mysql -u root -e "create database stage.rigorojas.com";
+        mysql -u root -e "create database <database name>";
 
         ##Restart services
         sudo service mysqld restart
