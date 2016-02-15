@@ -1,0 +1,70 @@
+# vagrant init fillup/centos-6.5-x86_64-minimal; vagrant up --provider virtualbox
+
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+Vagrant.configure(2) do |config|
+    # The most common configuration options are documented and commented below.
+    # For a complete reference, please see the online documentation at
+    # https://docs.vagrantup.com.
+
+    # Every Vagrant development environment requires a box. You can search for
+    # boxes at https://atlas.hashicorp.com/search.
+    config.vm.box = "fillup/centos-6.5-x86_64-minimal"
+
+    # config.vm.box_check_update = false
+    # config.vm.network "forwarded_port", guest: 80, host: 8080
+    config.vm.network "private_network", ip: "88.88.88.88"
+    # config.vm.network "public_network"
+
+    config.vm.provision "shell", inline: <<-SHELL
+        sudo yum update -y --exclude=kernel
+        sudo yum install -y unzip screen vim curl
+
+        ##Apache
+        sudo yum install -y httpd
+        sudo service httpd stop
+        sudo chkconfig --add httpd
+        sudo chkconfig httpd on
+
+        ##Dir mapping
+        sudo rm -rf /var/www/html
+        sudo ln -s /vagrant /var/www/html
+
+        ##PHP
+        sudo yum install -y php php-cli php-common php-mysql
+        sudo yum install -y gcc php-pear
+        sudo yum install -y ImageMagick
+
+        ##MySQL
+        sudo yum install -y mysql mysql-server mysql-devel
+        sudo chkconfig --add mysqld
+        sudo chkconfig mysqld on
+        mysql -u root -e "create database stage.rigorojas.com";
+
+        ##Restart services
+        sudo service mysqld restart
+        sudo service httpd restart
+
+        cd /var/www/html
+    SHELL
+end
+
+#enable htaccess
+# goto:
+#    /etc/httpd/conf/httpd.conf
+#
+# set:
+#    AllowOverride All
+#
+#restart apache:
+#    sudo service httpd restart
+#
+#
+#Add to .htaccess file to enable php short tags
+#   php_value short_open_tag 1
+#
